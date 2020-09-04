@@ -80,5 +80,7 @@ aa <- ggplot(wp2, aes(x = habitat, y = CarbonStock.Mgha_CORRECTED, color = habit
 aa
 
 grid.arrange(a, aa)
-ggsave(dpi=600, width = 7, height = 9, filename = "WP2.png")
+two_plots <- arrangeGrob(a,aa, nrow=2)
+
+ggsave(two_plots, dpi=600, width = 7, height = 9, filename = "TwoWPs.png")
        
