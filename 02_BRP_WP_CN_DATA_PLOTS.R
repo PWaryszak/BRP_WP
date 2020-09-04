@@ -2,7 +2,6 @@
 library(tidyverse)#install.packages() first if not in your local library
 library(grid)
 library(gridExtra)
-library(sjPlot)
 
 #LOAD and DATA:
 NewDATA <- read.csv("WP_CN_DATA.csv")#
@@ -23,18 +22,19 @@ NewDATA$CarbonStock.Mgha_CORRECTED <- NewDATA$CarbonStock.Mgha * NewDATA$Compact
 
 
 #Compare WP and WP3 site==========
-RehabControl <- filter(NewDATA, site == "Rehab" | site=="Control") %>% #Site WP2 had only Rehab (Degraded & Control (Natural) present
+RehabControl <- filter(NewDATA, site_type == "Degraded" | site_type=="Natural") %>% #Site WP2 had only Rehab (Degraded & Control (Natural) present
   filter (DepthTo_cm <= 5) %>%
-  group_by(coreID, site,WesternPort) %>%
+  group_by(coreID, site_type,WesternPort) %>%
   summarise(Stock = sum( CarbonStock.Mgha_CORRECTED, na.rm = T))
 
 
 View(RehabControl)
 
+#Boxplot of WP and WP2 stocks
 ggplot(data = RehabControl, aes( y = Stock, x = WesternPort)) +
   stat_summary(fun.data="mean_cl_boot", geom="errorbar", width=0.2, size = 1) +
   stat_summary(fun.y = "mean", size = 3, geom = "bar", fill = "lightblue")+
-  facet_grid(.~site)+
+  facet_grid(.~site_type)+
   theme_bw()+
   labs(x ="Two WP sites", y = "Carbon Stock (tonnes/hectare)")+
   theme(axis.text.x=element_text(size=12,colour = "black"),
@@ -48,10 +48,10 @@ ggplot(data = RehabControl, aes( y = Stock, x = WesternPort)) +
 #Plot by by elvation:=====
 a <- ggplot(RehabControl, aes(x = WesternPort, y = Stock, color = WesternPort)) +
   geom_boxplot(outlier.shape = NA) +
-  facet_grid( .~site)+ geom_jitter( alpha = 0.4)+
+  facet_grid( .~site_type)+ geom_jitter( alpha = 0.4)+
   labs(x= "", y = bquote('Organic Carbon Stock  ' (Mg*~ha^-1)))+
   theme_bw() +
-  ggtitle("Two Western Port sites (BRP)", subtitle = "Control [Natural], Rehab [Degraded]")+
+  ggtitle("Two Western Port sites (BRP)")+
   theme(axis.text.x = element_text(size = 16, color = "black"),
         axis.text.y = element_text(size = 16, color = "black"),
         axis.title.y = element_text(size = 16, color = "black"),
@@ -66,10 +66,10 @@ wp2 <- filter(NewDATA, WesternPort == "WP2")
 
 aa <- ggplot(wp2, aes(x = habitat, y = CarbonStock.Mgha_CORRECTED, color = habitat)) +
   geom_boxplot(outlier.shape = NA) +
-  facet_grid( .~site)+ geom_jitter( alpha = 0.4)+
+  facet_grid( .~site_type)+ geom_jitter( alpha = 0.4)+
   labs(x= "", y = bquote('Organic Carbon Stock  ' (Mg*~ha^-1)))+
   theme_bw() +
-  ggtitle("Site WP2 (BRP)", subtitle = "Control [Natural], Rehab [Degraded]")+
+  ggtitle("Site WP2 (BRP)")+
   theme(axis.text.x = element_text(size = 16, color = "black"),
         axis.text.y = element_text(size = 16, color = "black"),
         axis.title.y = element_text(size = 16, color = "black"),
@@ -82,5 +82,5 @@ aa
 grid.arrange(a, aa)
 two_plots <- arrangeGrob(a,aa, nrow=2)
 
-ggsave(two_plots, dpi=600, width = 7, height = 9, filename = "TwoWPs.png")
+#ggsave(two_plots, dpi=600, width = 7, height = 9, filename = "WP_plot.png")
        
